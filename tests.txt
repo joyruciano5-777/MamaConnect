@@ -1,0 +1,68 @@
+# Tests
+
+## Test 1 - CHW records an emergency assessment and it reaches the facility desk [sanity]
+Viewport: desktop
+Covers: authentication, role onboarding, patient creation, automatic referral trigger, realtime sync from CHW to Facility view, database persistence after reload
+Description: Verifies a CHW can sign in, record a high-risk assessment, and see it show up on the assigned facility's referral desk without a manual refresh.
+
+Steps:
+1. Sign in
+2. Choose the "Community Health Worker" role, select a facility, and continue
+3. Open "New assessment", fill in Name "Test Mother", Age 28, Gestational weeks 32, and check "Vaginal bleeding"
+4. Save the assessment
+5. Refresh the page
+
+Expected: The patient "Test Mother" appears in the CHW list tagged "REFER NOW — EMERGENCY" and a referral status is visible, and both remain visible after the refresh.
+
+## Test 2 - Facility staff acknowledges a referral and marks arrival
+Viewport: desktop
+Covers: role-scoped facility view, referral acknowledge/arrive workflow, database update, persistence after reload
+Description: Verifies a facility-role user can acknowledge an incoming referral and mark it arrived, and the state persists.
+
+Setup:
+1. As a CHW, record an assessment with "Convulsions" checked to generate an emergency referral to a facility
+
+Steps:
+1. Sign in as facility staff for the facility the referral was sent to (selecting that role/facility during onboarding)
+2. Find the incoming referral and click "Acknowledge"
+3. Click "Mark arrived"
+4. Refresh the page
+
+Expected: The referral shows status "Arrived" after the refresh.
+
+## Test 3 - Facility staff adjusts commodity stock
+Viewport: mobile
+Covers: commodity ledger update, database persistence after reload, mobile layout
+Description: Verifies stock quantity changes save and survive a reload.
+
+Steps:
+1. Sign in as facility staff
+2. On the commodity ledger, note the current Oxytocin quantity and tap "+" three times
+3. Refresh the page
+
+Expected: The Oxytocin quantity is 3 higher than the original value after the refresh.
+
+## Test 4 - District oversight reroutes a referral
+Viewport: desktop
+Covers: district-role access boundary, reroute workflow, cross-view aggregation
+Description: Verifies district oversight can reroute a referral and the "Rerouted after dispatch" stat updates.
+
+Setup:
+1. As a CHW, record an assessment with high blood pressure (systolic 170, diastolic 115) to generate an emergency referral
+
+Steps:
+1. Sign in as district oversight
+2. Open the District tab and find the pending referral
+3. Click "Reassign facility" and send it to an alternate facility
+
+Expected: The "Rerouted after dispatch" stat count increases by 1 and the referral's facility updates.
+
+## Test 5 - CHW role cannot access the Facility or District tabs
+Viewport: desktop
+Covers: role-based access boundary, negative permission test
+Description: Verifies a CHW-role account only sees the CHW workspace, not facility or district tools.
+
+Steps:
+1. Sign in and choose the "Community Health Worker" role during onboarding
+
+Expected: Only the CHW tab is visible in the navigation; no Facility, Map, or District tab is shown.
